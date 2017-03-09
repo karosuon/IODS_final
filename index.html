@@ -160,7 +160,7 @@ $(document).ready(function () {
 <div id="the-dataset" class="section level1">
 <h1>The dataset</h1>
 <p>My dataset for the assignment is The European Social Survey (ESS) which is a biennial cross-national survey of attitudes and behaviour established in 2001. The ESS is a cross-sectional survey using probability samples which are representative of all persons aged 15 and over resident within private households in each country. More information can be found here: <a href="http://www.europeansocialsurvey.org/" class="uri">http://www.europeansocialsurvey.org/</a> For this assignment, I used the round 7 which was collected at 2014.</p>
-<p>Before the analysis, I did some data wrangling (script can be found here: <a href="https://github.com/karosuon/IODS_final/blob/master/Data%20Wrangling">https://github.com/karosuon/IODS_final/blob/master/Data%20Wrangling</a>). At first, I filtered out missing values. Then I filtered out participants younger than fifteen and older than sixty-four. Next I renamed the values of the variable describing country: I wanted to use the real names of the countries (e.g., “Germany”), instead of the abbreviations (e.g., “DE”).I also standardized the independent variables measured by different scales (1-7 or 1-10) for making the results of the analysis easier to interpret. Lastly, I created a logical column “belong” which is TRUE for participants who belong to particular religion or denomination. Now the independent variables included in the analysis are the following</p>
+<p>Before the analysis, I did some data wrangling (script can be found here: <a href="https://github.com/karosuon/IODS_final/blob/master/data_wrangling_final.R" class="uri">https://github.com/karosuon/IODS_final/blob/master/data_wrangling_final.R</a>). At first, I filtered out missing values. Then I filtered out participants younger than fifteen and older than sixty-four. Next I renamed the values of the variable describing country: I wanted to use the real names of the countries (e.g., “Germany”), instead of the abbreviations (e.g., “DE”).I also standardized the independent variables measured by different scales (1-7 or 1-10) for making the results of the analysis easier to interpret. Lastly, I created a logical column “belong” which is TRUE for participants who belong to particular religion or denomination. Now the independent variables included in the analysis are the following</p>
 <blockquote>
 <ul>
 <li><ol style="list-style-type: decimal">
@@ -342,7 +342,7 @@ g1 + geom_point()</code></pre>
 <h2>Cross-validation</h2>
 <p>As a last part of the assignment, I perform 10-fold cross-validation on my model. Cross-validation involves partitioning a sample of data into complementary subsets, performing the analysis on one subset (“the training set”), and validating the analysis on the other subset (“the testing set”). The process is repeated so that eventually all of the data is used for both the training and testing.</p>
 <p>Delta gives two values: The first component is the raw cross-validation estimate of prediction error. The second component is the adjusted cross-validation estimate. The adjustment is designed to compensate for the bias introduced by not using leave-one-out cross-validation. Now they are both approximately 0.18. The training error estimated from the whole dataset was also 18 %. My model accurately predicted 82 % of the observations in the testing set.</p>
-<pre><code>## [1] 0.1782506 0.1783485</code></pre>
+<pre><code>## [1] 0.1783181 0.1786086</code></pre>
 </div>
 </div>
 
