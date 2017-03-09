@@ -1,0 +1,172 @@
+---
+title: "IODS final project"
+author: "Karoliina Suonpää, karoliina.suonpaa(at)helsinki.fi"
+date: "8 maaliskuuta 2017"
+output: html_document
+---
+
+```{r, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+setwd("Z:/Jatko-opinnot/Tilastotiede 2016/IODS")
+ESS <- read.csv("ESS.csv", sep=",", header=T)
+install.packages("dplyr", repos="http://cran.rstudio.com/")
+library(dplyr)
+ESS <- dplyr::select(ESS, -X)
+```
+
+```{r, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+#install and use the package 
+install.packages("GGally", repos="http://cran.rstudio.com/")
+library(GGally)
+```
+
+```{r, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+#install and access the package 
+install.packages("ggplot2", repos="http://cran.rstudio.com/")
+library(ggplot2)
+```
+
+#Introduction
+This is the final assignment for the course "Introduction to Open Data Science". The assignment consists of choosing the dataset and research question, processing a dataset for further analysis, performing the analysis and commenting on the results.
+
+#Abstract
+Religious identity is a complicated question which can be measured different ways. In this course work, the religiousness of European working age population is studied by using the dataset by *European Social Survey (ESS)*. The main question is to examine how religious beliefs and customs predict belonging to some religion or denomination. The impact of demographic variables (age and gender) and participants' home countries are studied also. Logistic regression is used in the analyses. Regarding the variables describing religious customs and beliefs, attending to religious services and having religious image of oneself seem to predict belonging to religion more than praying. European population is not homogeneous	with what it comes to religion. Gender differences of belonging to religion are quite small in this dataset, but age has a clear, positive association with belonging to religion.
+
+#Research questions
+I study how religious beliefs and customs predict belonging to some religion or denomination. I have the following hypotheses:
+
+> 
+* 1. Having a religious image of self is associated positively with belonging to religion
+* 2. Frequency of praying is associated positively with belonging to religion
+* 3. Frequency of attending to religious services is associated positively with belonging to religion
+* 4. Countries differ with their religiousness: I expect Sweden, the Netherlands, and some of the Easter European countries (e.g., Estonia and Czech Republic ) to have smaller odds of belonging to religion than Finnish participants, and catholic countries, for instance, Poland and Spain, to have greater odds of belonging to religion.
+* 5. I expect that females have slightly greater odds than males of belonging to religion.
+* 6. I expect that age has a positive association with belonging to religion.
+
+#The dataset
+My dataset for the assignment is The European Social Survey (ESS) which is a biennial cross-national survey of attitudes and behaviour established in 2001. The ESS is a cross-sectional survey using probability samples which are representative of all persons aged 15 and over resident within private households in each country. More information can be found here: http://www.europeansocialsurvey.org/ For this assignment, I used the round 7 which was collected at 2014. 
+
+Before the analysis, I did some data wrangling (script can be found here: https://github.com/karosuon/IODS_final/blob/master/Data%20Wrangling). At first, I filtered out missing values. Then I filtered out participants younger than fifteen and older than sixty-four. Next I renamed the values of the variable describing country: I wanted to use the real names of the countries (e.g., "Germany"), instead of the abbreviations (e.g., "DE").I also standardized the independent variables measured by different scales (1-7 or 1-10) for making the results of the analysis easier to interpret. Lastly, I created a logical column "belong" which is TRUE for participants who belong to particular religion or denomination. Now the independent variables included in the analysis are the following
+
+> 
+* 1. "rel_how"" Regardless of whether you belong to a particular religion, how religious would you say you are? (not at all - very religious)
+* 2. "rel_att" Apart from special occasions such as weddings and funerals, about how often do you attend religious services nowadays? (every day - never)
+* 3. "rel_pray" Apart from when you are at religious services, how often, if at all, do you pray?  (every day - never)
+* 4. "agea" Age of the participant
+* 5. "country" Country of the participant
+* 6. "gender" Gender of the participant
+
+Now there are 29,610 participants at the dataset. Below are the summaries of the variables and the list of the countries included in the dataset. We see, for instance, that slightly more participants belong to a religion or denomination (N=15,901) than do not belong (N=13,709), and there are little bit more women (N=15,540) than men (N=14,070) among the participants. Median age of the participants is 41. 
+
+```{r}
+summary(ESS)
+summary(ESS$country)
+```
+
+#Analyses
+
+##Correlations between the variables
+In the picture below we see the correlations of variables describing religiousness, and gender. We see, for instance, that praying, attending to religious services, seeing oneself as religious, and belonging to religion are quite strongly correlated. None of the variables is normally distributed. The correlations of different variables describing religiousness are pretty similar for males and females. It indicates that there is not big gender differences on how important for instance praying is seen among the participants belonging to religion.
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+p <- ggpairs(ESS, columns = 3:6, mapping = aes(col = gender, alpha = 0.3), lower = list(combo = wrap("facethist", bins = 20)))
+p
+```
+
+Next I want to see the correlation between age and belonging to religion. As expected, the correlation is positive.
+
+```{r}
+ESS$belong_num<-as.numeric(ESS$belong)
+#get correlation
+cor.test (ESS$agea, ESS$belong_num, alternative = c ("two.sided"))
+```
+
+##Logistic regression
+
+Next I examine the earlier hypothesis with logistic regression. Logistic regression, also called a logit model, is used to model dichotomous outcome variables (in this study, belonging to religion or denomination). In the logit model the log odds of the outcome is modeled as a linear combination of the predictor variables. Independent variables are the question how religious participant sees oneself, how often participant prays, how often participant attends to religious services, and the country, gender and age of the participants. Concerning the country, Finland is the reference group, and concerning the gender, women are the reference group.
+
+Below we have the results of logistic regression. We see that all of the countries differ statistically significantly from Finland. All of the variables describing religious customs and how religious the partipant sees oneself, are also associated with belonging to a religious group. Surprisingly, being male has weak but positive association with belonging to religion. As expected, age has positive association with belonging to religion.
+
+```{r}
+#logistic regression
+ESS <- within(ESS, country <- relevel(country, ref = "Finland"))
+logreg <- glm(belong ~ country + rel_how + rel_pray + rel_att + gender + agea, data = ESS, family = "binomial")
+summary(logreg)
+```
+
+Below we have the odds ratios and their confidence intervals (95 %). Odd ratio does not mean the same as probability: Probability ranges from 0 and 1,  ddds range from 0 and positive infinity. The odds increase as the probability increases or vice versa.
+
+As expected, holding other variables at a fixed value, having a religious image of self is associated positively with belonging to religion (OR=2.6). Similarly, frequency of praying (OR=1.5) and frequency of attending to religious services (OR=2.4) are associated positively with belonging to religion. Yet, praying seems less important part of belonging to religion than the other two variables.
+
+There are huge differences between the countries: As expected, participants from Sweden, the Netherlands, and Estonia and Czech Republic to have smaller odds of belonging to religion than Finnish participants, and catholic countries, for instance, Poland and Spain, to have greater odds of belonging to religion. The Israeli participants have the greatest odds (OR=382.5). Other than that, the countries with the greatest odds are Lithuania (OR=5.5) and Poland (OR=4.5), and on the other extreme there are Czech Republic (OR=0.3) and Estonia (0.7). 
+
+As stated before, the difference between genders is small but statistically significant: men have slightly greater odds (OR=1.1) of belonging to religion than women. I was sure I accidentally coded the genders reversed but I double checked and this is not a coding mistake. In other studies (as far as I know) women tend to be slightly more religious than men, and that's why I am puzzled. 
+
+As stated earlier, age has positive association with religiousness: each year increases the odds of belonging to religion by 0.7%
+
+```{r, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+install.packages("dplyr", repos="http://cran.rstudio.com/")
+library(dplyr)
+```
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+#odds ratios and the confidence intervalls (95 %)
+OR <- coef(logreg) %>% exp
+CI <- confint(logreg) %>% exp
+cbind(OR, CI)
+```
+
+##Testing the predictive power of the model
+
+Next I test the predictive power of my model by calculating the proportion of correctly classified observations. The proportion of inccorrectly classified observations is the error of my model. In the crosstable below we see the confusion matrix comparing the real and the predicted model. 
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+#predict the probability of belonging to religion
+probabilities <- predict(logreg, type = "response")
+#add the predicted probabilities to dataset
+ESS <- mutate(ESS, probability = probabilities)
+#use the probabilities to make a prediction of belonging to religion
+ESS <- mutate(ESS, prediction = probability >0.5 )
+table(religious = ESS$belong, prediction = ESS$prediction) %>% prop.table() %>% addmargins()
+```
+
+In the plot below, the probability is on the x axis and belonging to religion is on the y axis.
+
+```{r, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+library(ggplot2)
+```
+
+```{r}
+g1 <- ggplot(ESS, aes(x = probability, y = belong, col=prediction))
+g1 + geom_point()
+```
+
+Next I define a loss function and compute the mean prediction error for my model. Below we see that the training error of the model is 0.18. It means that, on average, 18 % of the predictions were wrong. Simple guessing method in a binary situation (e.g. flipping a symmetric coin) would have been right roughly in 50 % of the events. My model predicted accurately in 82 % of situations. Hence, my model performed better than just guessing. Still, interestingly, belongin to religion is complicated question: it seems to be something else than just the amount of praying, attending to religious services, and seeing oneself as religious.
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+#define a loss function (mean prediction error)
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+
+#call loss_func to compute the average number of wrong predictions in the (training) data
+loss_func(class = ESS$belong, prob = ESS$probability)
+```
+
+##Cross-validation
+
+As a last part of the assignment, I perform 10-fold cross-validation on my model. Cross-validation involves partitioning a sample of data into complementary subsets, performing the analysis on one subset ("the training set"), and validating the analysis on the other subset ("the testing set"). The process is repeated so that eventually all of the data is used for both the training and testing.
+
+Delta gives two values: The first component is the raw cross-validation estimate of prediction error. The second component is the adjusted cross-validation estimate. The adjustment is designed to compensate for the bias introduced by not using leave-one-out cross-validation. Now they are both approximately 0.18.  The training error estimated from the whole dataset was also 18 %. My model accurately predicted 82 % of the observations in the testing set. 
+
+```{r, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+install.packages("boot", repos="http://cran.rstudio.com/")
+library(boot)
+```
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+#perform 10-fold cross-validation by using earlier created loss function
+cv <- cv.glm(data = ESS, cost = loss_func, glmfit = logreg, K = 10)
+cv$delta
+```
+
