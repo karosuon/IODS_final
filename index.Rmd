@@ -73,7 +73,7 @@ I study the association of binary dependent variable (belonging or not belonging
 ###Correlations between the variables
 In the picture below we see the correlations of variables describing religiousness, and gender. We see, for instance, that praying, attending to religious services, seeing oneself as religious, and belonging to religion are quite strongly correlated. None of the variables is normally distributed. The correlations of different variables describing religiousness are pretty similar for males and females. It indicates that there is not big gender differences on how important for instance praying is seen among the participants belonging to religion.
 
-```{r, message=FALSE, warning=FALSE, echo=FALSE}
+```{r, message=FALSE, warning=FALSE}
 p <- ggpairs(ESS, columns = 3:6, mapping = aes(col = gender, alpha = 0.3), lower = list(combo = wrap("facethist", bins = 20)))
 p
 ```
@@ -112,7 +112,7 @@ install.packages("dplyr", repos="http://cran.rstudio.com/")
 library(dplyr)
 ```
 
-```{r, message=FALSE, warning=FALSE, echo=FALSE}
+```{r, message=FALSE, warning=FALSE}
 #odds ratios and the confidence intervalls (95 %)
 OR <- coef(logreg) %>% exp
 CI <- confint(logreg) %>% exp
@@ -123,7 +123,7 @@ cbind(OR, CI)
 
 Next I test the predictive power of my model by calculating the proportion of correctly classified observations. The proportion of incorrectly classified observations is the error of my model. In the crosstable below we see the confusion matrix comparing the real and the predicted model. 
 
-```{r, message=FALSE, warning=FALSE, echo=FALSE}
+```{r, message=FALSE, warning=FALSE}
 #predict the probability of belonging to religion
 probabilities <- predict(logreg, type = "response")
 #add the predicted probabilities to dataset
@@ -146,7 +146,7 @@ g1 + geom_point()
 
 Next I define a loss function and compute the mean prediction error for my model. Below we see that the training error of the model is 0.18. It means that, on average, 18 % of the predictions were wrong. Simple guessing method in a binary situation (e.g. flipping a symmetric coin) would have been right roughly in 50 % of the events. My model predicted accurately in 82 % of situations. Hence, my model performed better than just guessing. Still, interestingly, belonging to religion is complicated question: it seems to be something else than just the amount of praying, attending to religious services, and seeing oneself as religious.
 
-```{r, message=FALSE, warning=FALSE, echo=FALSE}
+```{r, message=FALSE, warning=FALSE}
 #define a loss function (mean prediction error)
 loss_func <- function(class, prob) {
   n_wrong <- abs(class - prob) > 0.5
@@ -167,7 +167,7 @@ install.packages("boot", repos="http://cran.rstudio.com/")
 library(boot)
 ```
 
-```{r, message=FALSE, warning=FALSE, echo=FALSE}
+```{r, message=FALSE, warning=FALSE}
 #perform 10-fold cross-validation by using earlier created loss function
 cv <- cv.glm(data = ESS, cost = loss_func, glmfit = logreg, K = 10)
 cv$delta
