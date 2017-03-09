@@ -2,7 +2,9 @@
 title: "IODS final project"
 author: "Karoliina Suonpää, karoliina.suonpaa(at)helsinki.fi"
 date: "8 maaliskuuta 2017"
-output: html_document
+output:
+  html_document:
+    code_folding: show
 ---
 
 ```{r, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
@@ -24,25 +26,26 @@ library(GGally)
 install.packages("ggplot2", repos="http://cran.rstudio.com/")
 library(ggplot2)
 ```
+#IODS FINAL ASSIGNMENT
 
-#Introduction
+##Introduction
 This is the final assignment for the course "Introduction to Open Data Science". The assignment consists of choosing the dataset and research question, processing a dataset for further analysis, performing the analysis and commenting on the results.
 
-#Abstract
-Religious identity is a complicated question which can be measured different ways. In this course work, the religiousness of European working age population is studied by using the dataset by *European Social Survey (ESS)*. The main question is to examine how religious beliefs and customs predict belonging to some religion or denomination. The impact of demographic variables (age and gender) and participants' home countries are studied also. Logistic regression is used in the analyses. Regarding the variables describing religious customs and beliefs, attending to religious services and having religious image of oneself seem to predict belonging to religion more than praying. European population is not homogeneous	with what it comes to religion. Gender differences of belonging to religion are quite small in this dataset, but age has a clear, positive association with belonging to religion.
+##Abstract
+Religiousness is a complicated question which can be measured different ways. In this course work, the religiousness of European working age population was studied by using the dataset by *European Social Survey (ESS)*. The main question was to examine how seeing oneself as religious person and having religious customs (praying and attending to religious services) predicted belonging to religion or denomination. The impact of demographic variables (age, gender and home country) was studied also. Logistic regression was used in the analyses. Results showed that attending to religious services and having religious image of oneself predicted belonging to religion more than the frequency of praying. Also, European population is not homogeneous with what it comes to belonging to religion. Gender differences of belonging to religion were small in this dataset, but age had a clear, positive association with belonging to religion.
 
-#Research questions
-I study how religious beliefs and customs predict belonging to some religion or denomination. I have the following hypotheses:
+##Research questions
+I study how seeing self as religious person and having religious customs predict belonging to some religion or denomination. I have the following hypotheses:
 
 > 
 * 1. Having a religious image of self is associated positively with belonging to religion
 * 2. Frequency of praying is associated positively with belonging to religion
 * 3. Frequency of attending to religious services is associated positively with belonging to religion
-* 4. Countries differ with their religiousness: I expect Sweden, the Netherlands, and some of the Easter European countries (e.g., Estonia and Czech Republic ) to have smaller odds of belonging to religion than Finnish participants, and catholic countries, for instance, Poland and Spain, to have greater odds of belonging to religion.
+* 4. Countries differ with their religiousness: I expect Sweden, the Netherlands, and some of the Easter European countries (e.g., Estonia and Czech Republic) to have smaller odds of belonging to religion than Finnish participants. Catholic countries, for instance, Poland and Spain, I expect to having greater odds of belonging to religion.
 * 5. I expect that females have slightly greater odds than males of belonging to religion.
 * 6. I expect that age has a positive association with belonging to religion.
 
-#The dataset
+##The Data
 My dataset for the assignment is The European Social Survey (ESS) which is a biennial cross-national survey of attitudes and behaviour established in 2001. The ESS is a cross-sectional survey using probability samples which are representative of all persons aged 15 and over resident within private households in each country. More information can be found here: http://www.europeansocialsurvey.org/ For this assignment, I used the round 7 which was collected at 2014. 
 
 Before the analysis, I did some data wrangling (script can be found here: https://github.com/karosuon/IODS_final/blob/master/data_wrangling_final.R). At first, I filtered out missing values. Then I filtered out participants younger than fifteen and older than sixty-four. Next I renamed the values of the variable describing country: I wanted to use the real names of the countries (e.g., "Germany"), instead of the abbreviations (e.g., "DE").I also standardized the independent variables measured by different scales (1-7 or 1-10) for making the results of the analysis easier to interpret. Lastly, I created a logical column "belong" which is TRUE for participants who belong to particular religion or denomination. Now the independent variables included in the analysis are the following
@@ -62,9 +65,12 @@ summary(ESS)
 summary(ESS$country)
 ```
 
-#Analyses
+##Methods
+I study the association of binary dependent variable (belonging or not belonging to religion) and independent variables by using logistic regression. In the logit model, the log odds of the outcome is modeled as a linear combination of the predictor variables. The exponents of the coefficients of a logistic regression model can be interpret as odds ratios between a unit change (versus no change) in the corresponding explanatory variable. Odd ratio does not mean the same as probability: probability ranges from 0 and 1, odds range from 0 and positive infinity. The odds increase as the probability increases or vice versa. After estimating the logistic model, I define a loss function and compute the mean prediction error for my model. I also perform 10-fold cross-validation on my model for seeing how accurately my model can predict the observations.
 
-##Correlations between the variables
+##Analyses
+
+###Correlations between the variables
 In the picture below we see the correlations of variables describing religiousness, and gender. We see, for instance, that praying, attending to religious services, seeing oneself as religious, and belonging to religion are quite strongly correlated. None of the variables is normally distributed. The correlations of different variables describing religiousness are pretty similar for males and females. It indicates that there is not big gender differences on how important for instance praying is seen among the participants belonging to religion.
 
 ```{r, message=FALSE, warning=FALSE, echo=FALSE}
@@ -80,11 +86,11 @@ ESS$belong_num<-as.numeric(ESS$belong)
 cor.test (ESS$agea, ESS$belong_num, alternative = c ("two.sided"))
 ```
 
-##Logistic regression
+###Logistic regression
 
-Next I examine the earlier hypothesis with logistic regression. Logistic regression, also called a logit model, is used to model dichotomous outcome variables (in this study, belonging to religion or denomination). In the logit model the log odds of the outcome is modeled as a linear combination of the predictor variables. Independent variables are the question how religious participant sees oneself, how often participant prays, how often participant attends to religious services, and the country, gender and age of the participants. Concerning the country, Finland is the reference group, and concerning the gender, women are the reference group.
+Next I examine the earlier hypothesis with logistic regression. Dependent variable is the belonging to religion, and independent variables are the question how religious participant sees oneself, how often participant prays, how often participant attends to religious services, and the country, gender and age of the participants. Concerning the country, Finland is the reference group, and concerning the gender, women are the reference group.
 
-Below we have the results of logistic regression. We see that all of the countries differ statistically significantly from Finland. All of the variables describing religious customs and how religious the partipant sees oneself, are also associated with belonging to a religious group. Surprisingly, being male has weak but positive association with belonging to religion. As expected, age has positive association with belonging to religion.
+Below we have the results of logistic regression. We see that all of the countries differ statistically significantly from Finland. All of the variables describing religious customs and how religious the participant sees oneself, are also associated with belonging to a religious group. Surprisingly, being male has weak but positive association with belonging to religion. As expected, age has positive association with belonging to religion.
 
 ```{r}
 #logistic regression
@@ -93,15 +99,13 @@ logreg <- glm(belong ~ country + rel_how + rel_pray + rel_att + gender + agea, d
 summary(logreg)
 ```
 
-Below we have the odds ratios and their confidence intervals (95 %). Odd ratio does not mean the same as probability: Probability ranges from 0 and 1,  ddds range from 0 and positive infinity. The odds increase as the probability increases or vice versa.
+Below we have the odds ratios and their confidence intervals (95 %). As expected, having a religious image of self is associated positively with belonging to religion (OR=2.6). Similarly, frequency of praying (OR=1.5) and frequency of attending to religious services (OR=2.4) are associated positively with belonging to religion. Yet, praying seems less important part of belonging to religion than the other two variables.
 
-As expected, holding other variables at a fixed value, having a religious image of self is associated positively with belonging to religion (OR=2.6). Similarly, frequency of praying (OR=1.5) and frequency of attending to religious services (OR=2.4) are associated positively with belonging to religion. Yet, praying seems less important part of belonging to religion than the other two variables.
-
-There are huge differences between the countries: As expected, participants from Sweden, the Netherlands, and Estonia and Czech Republic to have smaller odds of belonging to religion than Finnish participants, and catholic countries, for instance, Poland and Spain, to have greater odds of belonging to religion. The Israeli participants have the greatest odds (OR=382.5). Other than that, the countries with the greatest odds are Lithuania (OR=5.5) and Poland (OR=4.5), and on the other extreme there are Czech Republic (OR=0.3) and Estonia (0.7). 
+There are huge differences between the countries: As expected, participants from Sweden, the Netherlands, Estonia and Czech Republic have smaller odds of belonging to religion than Finnish participants. Catholic countries, for instance, Poland and Spain, have greater odds of belonging to religion. The Israeli participants have the greatest odds (OR=382.5). Other than that, the countries with the greatest odds of belonging to religion are Lithuania (OR=5.5) and Poland (OR=4.5), and on the other extreme there are Czech Republic (OR=0.3) and Estonia (0.7). 
 
 As stated before, the difference between genders is small but statistically significant: men have slightly greater odds (OR=1.1) of belonging to religion than women. I was sure I accidentally coded the genders reversed but I double checked and this is not a coding mistake. In other studies (as far as I know) women tend to be slightly more religious than men, and that's why I am puzzled. 
 
-As stated earlier, age has positive association with religiousness: each year increases the odds of belonging to religion by 0.7%
+As stated earlier, age has positive association with religiousness: each year increases the odds of belonging to religion by 0.7%.
 
 ```{r, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
 install.packages("dplyr", repos="http://cran.rstudio.com/")
@@ -115,9 +119,9 @@ CI <- confint(logreg) %>% exp
 cbind(OR, CI)
 ```
 
-##Testing the predictive power of the model
+###Testing the predictive power of the model
 
-Next I test the predictive power of my model by calculating the proportion of correctly classified observations. The proportion of inccorrectly classified observations is the error of my model. In the crosstable below we see the confusion matrix comparing the real and the predicted model. 
+Next I test the predictive power of my model by calculating the proportion of correctly classified observations. The proportion of incorrectly classified observations is the error of my model. In the crosstable below we see the confusion matrix comparing the real and the predicted model. 
 
 ```{r, message=FALSE, warning=FALSE, echo=FALSE}
 #predict the probability of belonging to religion
@@ -140,7 +144,7 @@ g1 <- ggplot(ESS, aes(x = probability, y = belong, col=prediction))
 g1 + geom_point()
 ```
 
-Next I define a loss function and compute the mean prediction error for my model. Below we see that the training error of the model is 0.18. It means that, on average, 18 % of the predictions were wrong. Simple guessing method in a binary situation (e.g. flipping a symmetric coin) would have been right roughly in 50 % of the events. My model predicted accurately in 82 % of situations. Hence, my model performed better than just guessing. Still, interestingly, belongin to religion is complicated question: it seems to be something else than just the amount of praying, attending to religious services, and seeing oneself as religious.
+Next I define a loss function and compute the mean prediction error for my model. Below we see that the training error of the model is 0.18. It means that, on average, 18 % of the predictions were wrong. Simple guessing method in a binary situation (e.g. flipping a symmetric coin) would have been right roughly in 50 % of the events. My model predicted accurately in 82 % of situations. Hence, my model performed better than just guessing. Still, interestingly, belonging to religion is complicated question: it seems to be something else than just the amount of praying, attending to religious services, and seeing oneself as religious.
 
 ```{r, message=FALSE, warning=FALSE, echo=FALSE}
 #define a loss function (mean prediction error)
@@ -153,8 +157,7 @@ loss_func <- function(class, prob) {
 loss_func(class = ESS$belong, prob = ESS$probability)
 ```
 
-##Cross-validation
-
+###Cross-validation
 As a last part of the assignment, I perform 10-fold cross-validation on my model. Cross-validation involves partitioning a sample of data into complementary subsets, performing the analysis on one subset ("the training set"), and validating the analysis on the other subset ("the testing set"). The process is repeated so that eventually all of the data is used for both the training and testing.
 
 Delta gives two values: The first component is the raw cross-validation estimate of prediction error. The second component is the adjusted cross-validation estimate. The adjustment is designed to compensate for the bias introduced by not using leave-one-out cross-validation. Now they are both approximately 0.18.  The training error estimated from the whole dataset was also 18 %. My model accurately predicted 82 % of the observations in the testing set. 
@@ -169,4 +172,10 @@ library(boot)
 cv <- cv.glm(data = ESS, cost = loss_func, glmfit = logreg, K = 10)
 cv$delta
 ```
+
+##Conclusions
+
+In this assignment, the religiousness of European working age population was studied by using the European Social Survey. Dependent variable was belonging to religion or denomination, and independent variables were having a religious image of self, frequency of praying and attending to religious services, country, gender, and age. Logistic regression was used for studying the associations.
+
+As stated in hypotheses, having religious image of oneself, praying and attending to religious services were associated with belonging to religion, even when studied in the same model simultaneously. Yet, they were not equally important parts of belonging to religion: having a religious image of oneself and attending to religious services had greater odds of belonging to religion than praying.  Countries differed with their religiousness: As expected, participants from Sweden, the Netherlands, Estonia and Czech Republic had smaller odds of belonging to religion than Finnish participants. Participants from Catholic countries, for instance, from Poland and Spain, had greater odds of belonging to religion. Slightly against my hypothesis, men had a slightly greater odds of belonging to religion than women. As expected, belonging to religion was more common among older participants. These variables predicted participants' belonging to religion accurately in slightly more than 80 % of the situations. This indicates that belonging to religion is not explained only by seeing oneself religious, attending to services, and praying (or by the demographic variables either). Belonging to religion may have different meanings for different individuals in different countries.
 
