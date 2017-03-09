@@ -9,15 +9,6 @@ dim(ESS)
 str(ESS)
 summary(ESS)
 
-?#transform the variables to numeric
-library(stringr)
-ESS$rlgblg <- str_replace(ESS$rlgblg, pattern=",", replace ="") %>% as.numeric
-ESS$rlgdgr <- str_replace(ESS$rlgdgr, pattern=",", replace ="") %>% as.numeric
-ESS$rlgatnd <- str_replace(ESS$rlgatnd, pattern=",", replace ="") %>% as.numeric
-ESS$pray <- str_replace(ESS$pray, pattern=",", replace ="") %>% as.numeric
-ESS$gndr <- str_replace(ESS$gndr, pattern=",", replace ="") %>% as.numeric
-ESS$agea <- str_replace(ESS$agea, pattern=",", replace ="") %>% as.numeric
-
 ##filter out missing data 
 library(plyr)
 library(dplyr)
